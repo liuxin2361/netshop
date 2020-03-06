@@ -27,6 +27,11 @@ class Goods(models.Model):
     def __str__(self):
         return self.gname
 
+    def get_img_url(self):
+        # 从一的模型查找多的模型
+        # 通过'多的模型小写名_set'查找
+        return self.inventory_set.first().color.colorurl
+
 
 class GoodsDetailName(models.Model):
     """
