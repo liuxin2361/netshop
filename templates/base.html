@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    {# 在settings中使用了 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static', 'css'),] 进行了配置，所以href="/static/login.css" #}
+    <link rel="stylesheet" href="/static/login.css">
+    <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="/static/detail.css">
+    <link rel="stylesheet" href="/static/carts.css">
+    <link rel="stylesheet" href="/static/reset.css">
+    <link rel="stylesheet" href="/static/mygxin.css">
+    <script src="/static/jquery.min.js"></script>
+    <script src="/static/carts.js"></script>
+    {% block headerjs %}
+
+    {% endblock %}
+</head>
+<body>
+{% include 'top.html' %}
+{% block main %}
+
+{% endblock %}
+
+{% block footerjs %}
+
+{% endblock %}
+</body>
+</html>
