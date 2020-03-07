@@ -94,7 +94,6 @@
             <div class="zhanshi">
                 {# for循环字典 #}
                 {% for detail_name, url_list in goods.get_detail_info.items %}
-
                     <div class="zhanshi-model">
                         <p>{{ detail_name }}</p>
                         <div class="line"></div>
@@ -102,63 +101,30 @@
                             <img src="{{ url }}" alt="">
                         {% endfor %}
                     </div>
-
                 {% endfor %}
-
             </div>
         </div>
     </div>
 
-
     <div class="goods-model" style="margin-right: -18px;text-align: center">
         <img src="/static/recommend.png" style="position: relative;left: -10px;top: 10px">
         <div class="goods-content">
-            <div class="good">
-                <a href="http://127.0.0.1:8000/goodsdetails/5">
-                    <img src="/static/bai_mt1VrH5.jpg" width="285px" height="285px">
-                    <p class="name">秋时尚印花两件套装裙</p>
-                    <div class="price">
-                        <i>￥</i>
-                        <p class="big">35.00</p>
-                        <s>￥100.00</s>
-                    </div>
-                    <div class="sale">
-                        特卖
-                    </div>
-                </a>
-            </div>
-
-
-            <div class="good">
-                <a href="http://127.0.0.1:8000/goodsdetails/6">
-                    <img src="/static/hong_y7wQwRw.jpg" width="285px" height="285px">
-                    <p class="name">韩版侧开叉宽松毛衣</p>
-                    <div class="price">
-                        <i>￥</i>
-                        <p class="big">39.00</p>
-                        <s>￥369.00</s>
-                    </div>
-                    <div class="sale">
-                        特卖
-                    </div>
-                </a>
-            </div>
-
-
-            <div class="good">
-                <a href="http://127.0.0.1:8000/goodsdetails/18">
-                    <img src="/static/lv_eFlravj.jpg" width="285px" height="285px">
-                    <p class="name">时尚修身两件套装裙</p>
-                    <div class="price">
-                        <i>￥</i>
-                        <p class="big">68.90</p>
-                        <s>￥299.00</s>
-                    </div>
-                    <div class="sale">
-                        特卖
-                    </div>
-                </a>
-            </div>
+            {% for recommend in recommend_list %}
+                <div class="good">
+                    <a href="/goodsdetails/{{ recommend.id }}/">
+                        <img src="{{ recommend.get_img_url }}" width="285px" height="285px">
+                        <p class="name">{{ recommend.gname }}</p>
+                        <div class="price">
+                            <i>￥</i>
+                            <p class="big">{{ recommend.price }}</p>
+                            <s>￥{{ recommend.oldprice }}</s>
+                        </div>
+                        <div class="sale">
+                            特卖
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

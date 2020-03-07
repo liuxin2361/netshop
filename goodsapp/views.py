@@ -39,10 +39,44 @@ class IndexView(View):
                        'page_list': page_list})
 
 
+def recommend(func):
+    """
+    recommend装饰器，实现猜你喜欢功能
+    :param func: 被装饰函数名称
+    :return:
+    """
+    def _wrapper(detail_view, request, goods_id, *args, **kwargs):
+        # 将goods_id转成string型，方便后续存入cookie
+        goods_id_str = str(goods_id)
+        # 获取cookie中的goods_id_list
+        c_goods_id = request.COOKIES.get('c_goods_id', '')
+        # 存放用户访问过的商品ID列表
+        goods_id_list = [id for id in c_goods_id.split() if id.strip()]
+        # 存放用户访问过的商品对象列表,取前4个;
+        goods_list = [Goods.objects.get(id=g_id) for g_id in goods_id_list if
+                      g_id != goods_id_str and Goods.objects.get(id=g_id).category_id == Goods.objects.get(
+                          id=goods_id).category_id][:4]
+        # 将当前商品ID放入访问过的商品ID列表中的第一位
+        if goods_id_str in goods_id_list:
+            goods_id_list.remove(goods_id_str)
+        goods_id_list.insert(0, goods_id_str)
+        # 调用视图方法，视图方法返回一个response对象
+        response = func(detail_view, request, goods_id, recommend_list=goods_list, *args, **kwargs)
+        # 将用户访问过的商品ID列表转成字符串存放至cookie中,['1','2','3'] -> '1 2 3',有效期3天
+        response.set_cookie('c_goods_id', ' '.join(goods_id_list), max_age=3 * 24 * 60 * 60)
+        return response
+
+    return _wrapper
+
+
 class DetailView(View):
-    def get(self, request, goods_id):
+
+    # 使用装饰器对get方法添加新功能
+    @recommend
+    def get(self, request, goods_id, recommend_list=[]):
         """
         商品详情的get请求
+        :param recommend_list: 猜你喜欢中推荐的商品列表
         :param request:
         :param goods_id: 商品id
         :return:
@@ -52,4 +86,4 @@ class DetailView(View):
             goods = Goods.objects.get(id=goods_id)
         except Goods.DoesNotExist:
             raise Http404
-        return render(request, 'detail.html', {'goods': goods})
+        return render(request, 'detail.html', {'goods': goods, 'recommend_list': recommend_list})
