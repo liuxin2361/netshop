@@ -14,7 +14,7 @@
 
     <div class="goods-model">
         <div class="goods-content">
-            {% for goods in goods_list %}
+            {% for goods in goods_list.object_list %}
                 <div class="good">
                     <a href="http://127.0.0.1:8000/goodsdetails/4">
                         <img src="{{ goods.get_img_url }}" width="285px" height="285px">
@@ -35,10 +35,28 @@
 
     <div id="pager" style="text-align: center; font-size: 16px; overflow: hidden; margin-top: 10px;">
 
+        <a href="/category/{{ current_category }}/page/1/">首页</a>
 
-        <a href="http://127.0.0.1:8000/category/8/page/2"
-           style="display: inline-block; padding: 5px; margin: 5px;">下一页</a>
+        {% if goods_list.has_previous %}
+            <a href="/category/{{ current_category }}/page/{{ goods_list.previous_page_number }}/"
+               style="display: inline-block; padding: 5px; margin: 5px;">上一页</a>
+        {% endif %}
 
+        {% for page in page_list %}
+            {% if  page == goods_list.number %}
+                <a href="/category/{{ current_category }}/page/{{ page }}/"
+                   style="color: red; font-size: 20px">{{ page }}</a>
+            {% else %}
+                <a href="/category/{{ current_category }}/page/{{ page }}/">{{ page }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if goods_list.has_next %}
+            <a href="/category/{{ current_category }}/page/{{ goods_list.next_page_number }}/"
+               style="display: inline-block; padding: 5px; margin: 5px;">下一页</a>
+        {% endif %}
+
+        <a href="/category/{{ current_category }}/page/{{ goods_list.paginator.num_pages }}/">末页</a>
 
     </div>
 {% endblock %}

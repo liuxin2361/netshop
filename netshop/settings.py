@@ -128,3 +128,6 @@ STATICFILES_DIRS = [
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
+
+# 单页显示的商品数量
+PER_PAGE_NUMBER = 8
