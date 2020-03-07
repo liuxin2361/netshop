@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.shortcuts import render
 
 # Create your views here.
@@ -12,6 +13,7 @@ class IndexView(View):
 
     def get(self, request, category_id=16, page=1):
         """
+        首页信息的get请求
         :param page: 页码
         :param category_id: 默认页面显示的类别
         :param request:
@@ -35,3 +37,19 @@ class IndexView(View):
         return render(request, 'index.html',
                       {'category_list': category_list, 'goods_list': page_goods, 'current_category': category_id,
                        'page_list': page_list})
+
+
+class DetailView(View):
+    def get(self, request, goods_id):
+        """
+        商品详情的get请求
+        :param request:
+        :param goods_id: 商品id
+        :return:
+        """
+        # 根据商品id获取商品详细信息
+        try:
+            goods = Goods.objects.get(id=goods_id)
+        except Goods.DoesNotExist:
+            raise Http404
+        return render(request, 'detail.html', {'goods': goods})

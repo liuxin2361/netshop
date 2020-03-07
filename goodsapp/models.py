@@ -28,9 +28,50 @@ class Goods(models.Model):
         return self.gname
 
     def get_img_url(self):
+        """
+        获取商品图片地址
+        :return: 返回对应商品的图片地址
+        """
         # 从一的模型查找多的模型
         # 通过'多的模型小写名_set'查找
         return self.inventory_set.first().color.colorurl
+
+    def get_colours(self):
+        """
+        获取商品的颜色
+        :return: 返回商品的颜色列表
+        """
+        colors = []
+        for inventory in self.inventory_set.all():
+            color = inventory.color
+            if color not in colors:
+                colors.append(color)
+        return colors
+
+    def get_sizes(self):
+        """
+        获取商品尺寸
+        :return: 返回商品的尺寸列表
+        """
+        sizes = []
+        for inventory in self.inventory_set.all():
+            size = inventory.size
+            if size not in sizes:
+                sizes.append(size)
+        return sizes
+
+    # {'参数规格':['url'], '整体款式'：['url'], '模特实拍':['url1','url2',...]}
+    def get_detail_info(self):
+        datas = {}
+        for detail in self.goodsdetail_set.all():
+            # 获取详情名称
+            detail_name = detail.get_detail_name()
+            # 判断detail_name是否在字典中存在
+            if detail_name not in datas:
+                datas[detail_name] = [detail.gdurl]
+            else:
+                datas[detail_name].append(detail.gdurl)
+        return datas
 
 
 class GoodsDetailName(models.Model):
@@ -53,6 +94,9 @@ class GoodsDetail(models.Model):
 
     def __str__(self):
         # 返回的是表GoodsDetailName中的gdname
+        return self.detailname.gdname
+
+    def get_detail_name(self):
         return self.detailname.gdname
 
 
