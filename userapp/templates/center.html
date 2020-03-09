@@ -8,8 +8,7 @@
 
 {% block main %}
 
-    <input type="hidden" name="csrfmiddlewaretoken"
-           value="SSm6OhZlgtgLmmLi07RWmPYijzLpebaCh0pFbf57zYddklUSB4EBEks157EvG81b">
+    {% csrf_token %}
     <div class="Bott">
         <div class="wrapper clearfix" style="margin: 0 auto">
             <div class="zuo fl" style="margin-left: 100px">
@@ -74,9 +73,11 @@
             $.ajax({
                 type: 'post',
                 url: '/user/logout/',
-                data: 'csrfmiddlewaretoken=' + $('input[name="csrfmiddlewaretoken"]').val(),
+                data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
                 success: function (data) {
-                    window.location = '/user/login/'
+                    if (data.logout) {
+                        window.location.href = '/user/login/'
+                    }
                 }
             })
         })
