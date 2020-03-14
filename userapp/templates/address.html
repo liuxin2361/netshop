@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}地址管理页面{% endblock %}
+
+{% block headerjs %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+    <link href="/static/assets/css/admin.css" rel="stylesheet" type="text/css">
+    <link href="/static/assets/css/amazeui.css" rel="stylesheet" type="text/css">
+    <link href="/static/assets/css/personal.css" rel="stylesheet" type="text/css">
+    <link href="/static/assets/css/addstyle.css" rel="stylesheet" type="text/css">
+    <script src="/static/assets/js/jquery.min.js" type="text/javascript"></script>
+    <script src="/static/assets/js/amazeui.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block main %}
+
+    {% csrf_token %}
+    <div class="Bott">
+        <div class="wrapper clearfix" style="margin: 0 auto">
+            <div class="zuo fl" style="margin-left: 100px">
+                <h3>
+                    <a href="http://127.0.0.1:8000/"><img src="/static/tx.png"></a>
+                    <p class="clearfix"><span class="fl">[{{ login_user.uname }}]</span><span
+                            class="fr logout">[退出登录]</span>
+                    </p>
+                </h3>
+                <div>
+                    <ul>
+                        <li><a href="http://127.0.0.1:8000/user/usercenter/#">我的订单</a></li>
+                    </ul>
+                    <ul>
+                        <li><a href="/user/address/">地址管理</a></li>
+                    </ul>
+                    <ul>
+                        <li><a href="http://127.0.0.1:8000/">回到首页</a></li>
+                    </ul>
+
+                </div>
+            </div>
+
+            <div class="you fl main-wrap">
+
+                <div class="user-address">
+                    <!--标题 -->
+                    <div class="am-cf am-padding">
+                        <div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">地址管理</strong> / <small>Address&nbsp;list</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <ul class="am-avg-sm-1 am-avg-md-3 am-thumbnails">
+                        {% for addr in addr_list %}
+                            <li class="user-addresslist {% if addr.isdefault %}defaultAddr{% endif %}"
+                                onclick="updateDefaultAddr({{ addr.id }})">
+                                <span class="new-option-r"><i class="am-icon-check-circle"></i>默认地址</span>
+                                <p class="new-tit new-p-re">
+                                    <span class="new-txt">{{ addr.aname }}</span>
+                                    <span class="new-txt-rd2">{{ addr.aphone }}</span>
+                                </p>
+                                <div class="new-mu_l2a new-p-re">
+                                    <p class="new-mu_l2cw">
+                                        <span class="title">地址：</span>
+                                        <span class="street">{{ addr.addr }}</span></p>
+                                </div>
+                                <div class="new-addr-btn">
+                                    <a href="#"><i class="am-icon-edit"></i>编辑</a>
+                                    <span class="new-addr-bar">|</span>
+                                    <a href="/user/delAddr/?addrid={{ addr.id }}"><i class="am-icon-trash"></i>删除</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="clear"></div>
+                    <a class="new-abtn-type" data-am-modal="{target: '#doc-modal-1', closeViaDimmer: 0}">添加新地址</a>
+                    <!--例子-->
+                    <div class="" id="doc-modal-1">
+
+                        <div class="add-dress">
+
+                            <!--标题 -->
+                            <div class="am-cf am-padding">
+                                <div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">新增地址</strong> /
+                                    <small>Add&nbsp;address</small></div>
+                            </div>
+                            <hr>
+
+                            <div class="am-u-md-12 am-u-lg-8" style="margin-top: 20px;">
+                                <form class="am-form am-form-horizontal" method="post" action="/user/address/"
+                                      id="frmId">
+                                    {% csrf_token %}
+                                    <div class="am-form-group">
+                                        <label for="user-name" class="am-form-label">收货人</label>
+                                        <div class="am-form-content">
+                                            <input type="text" id="aname" placeholder="收货人" name="aname">
+                                        </div>
+                                    </div>
+
+                                    <div class="am-form-group">
+                                        <label for="user-phone" class="am-form-label">手机号码</label>
+                                        <div class="am-form-content">
+                                            <input id="user-phone" placeholder="手机号必填" type="text" name="aphone">
+                                        </div>
+                                    </div>
+                                    <div class="am-form-group">
+                                        <label for="user-address" class="am-form-label">所在地</label>
+                                        <div class="am-form-content address">
+                                            <select id="province" onchange="loadCity();">
+                                                <option value="a">浙江省</option>
+                                            </select>
+                                            <select id="city" onchange="loadTown();">
+                                                <option value="a">温州市</option>
+                                            </select>
+                                            <select id="town">
+                                                <option value="a">瑞安区</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="am-form-group">
+                                        <label for="user-intro" class="am-form-label">详细地址</label>
+                                        <div class="am-form-content">
+                                            <textarea class="" rows="3" id="addr" name="addr" placeholder="输入详细地址"
+                                                      onfocus="loadInfo()"></textarea>
+                                            <small>100字以内写出你的详细地址...</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="am-form-group">
+                                        <div class="am-u-sm-9 am-u-sm-push-3">
+                                            <a class="am-btn am-btn-danger" onclick="$('#frmId').submit()">保存</a>
+                                            <a href="javascript: void(0)" class="am-close am-btn am-btn-danger"
+                                               data-am-modal-close="">取消</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        $(".new-option-r").click(function () {
+                            $(this).parent('.user-addresslist').addClass("defaultAddr").siblings().removeClass("defaultAddr");
+                        });
+
+                        var $ww = $(window).width();
+                        if ($ww > 640) {
+                            $("#doc-modal-1").removeClass("am-modal am-modal-no-btn")
+                        }
+
+                    })
+                </script>
+
+                <div class="clear"></div>
+
+            </div>
+
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block footerjs %}
+
+    <script>
+        $('.logout').click(function () {
+
+            $.ajax({
+                type: 'post',
+                url: '/user/logout/',
+                data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+                success: function (data) {
+                    if (data.logout) {
+                        window.location.href = '/user/login/'
+                    }
+                }
+            })
+        })
+
+        //页面刷新就加载三级联动菜单数据
+        $(function () {
+            loadProvince()
+        });
+
+        function loadProvince() {
+            loadArea(0, 'province', loadCity);
+        }
+
+        function loadCity() {
+            loadArea($('#province').val(), 'city', loadTown);
+        }
+
+        function loadTown() {
+            loadArea($('#city').val(), 'town',);
+        }
+
+        function loadArea(pid, selectid, nextLoad) {
+            //清空当前select框数据
+            $('#' + selectid).empty();
+
+            //发送ajax请求加载数据
+            $.get('/user/loadArea/', {'pid': pid}, function (result) {
+                // 接收响应数据, 接收到的是字符串类型
+                var jareaList = result.jarea_list;
+                // 将json格式字符串数据转换成json对象数据
+                var areaList = JSON.parse(jareaList);
+                // 遍历数组
+                for (var i = 0; i < areaList.length; i++) {
+                    area = areaList[i];
+                    // 将数据插入到下拉列表
+                    $('#' + selectid).append('<option value="' + area.pk + '">' + area.fields.areaname + '</option>')
+                }
+
+                // 判断是否需要加载下一级菜单
+                if (nextLoad != null) {
+                    nextLoad();
+                }
+            });
+        }
+
+        function loadInfo() {
+            // 获取下拉列表的值
+            var province = $('#province>option:selected').text();
+            var city = $('#city>option:selected').text();
+            var town = $('#town>option:selected').text();
+            var addr = province + ' ' + city + ' ' + town;
+
+            $('#addr').val(addr)
+        }
+
+        // 修改页面显示的默认地址
+        function updateDefaultAddr(addrid) {
+            window.location.href = '/user/updateDefaultAddr/?addrid=' + addrid;
+        }
+
+    </script>
+
+{% endblock %}

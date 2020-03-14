@@ -1,11 +1,12 @@
 import jsonpickle
+from django.core.serializers import serialize
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.views import View
 
-from userapp.models import UserInfo
+from userapp.models import UserInfo, Area, Address
 from utils.code import gene_code
 
 
@@ -78,3 +79,62 @@ class LogoutView(View):
         request.session.flush()
         # 返回响应
         return JsonResponse({'logout': True})
+
+
+class AddressView(View):
+    def get(self, request):
+        # 获取当前登录用户下的收货地址信息
+        # 获取当前登录用户对象
+        user_str = request.session.get('user', '')
+        if user_str:
+            # 将session数据转换成对象
+            user = jsonpickle.loads(user_str)
+        addr_list = user.address_set.all()
+        return render(request, 'address.html', {'addr_list': addr_list})
+
+    def post(self, request):
+        # 获取请求参数
+        aname = request.POST.get('aname', '')
+        aphone = request.POST.get('aphone', '')
+        addr = request.POST.get('addr', '')
+        # 获取当前登录用户对象
+        user_str = request.session.get('user', '')
+        if user_str:
+            # 将session数据转换成对象
+            user = jsonpickle.loads(user_str)
+
+        # 插入数据库表
+        # 从 一的模型 查找 多的模型通过 '多的模型小写名_set' 查找
+        # lambda参考onenote笔记
+        Address.objects.create(aname=aname, aphone=aphone, addr=addr, userinfo=user,
+                               isdefault=(lambda count: True if count == 0 else False)(user.address_set.count()))
+        return redirect('/user/address/')
+
+
+def load_area_view(request):
+    # 获取请求参数
+    pid = request.GET.get('pid', -1)
+    pid = int(pid)
+    area_list = Area.objects.filter(parentid=pid)
+    # 序列化数据
+    jarea_list = serialize('json', area_list)
+    return JsonResponse({'jarea_list': jarea_list})
+
+
+def update_default_addr_view(request):
+    # 获取请求参数
+    addr_id = request.GET.get('addrid', -1)
+    addr_id = int(addr_id)
+    # 修改数据
+    Address.objects.filter(id=addr_id).update(isdefault=True)
+    Address.objects.exclude(id=addr_id).update(isdefault=False)
+    return redirect('/user/address/')
+
+
+def del_addr_view(request):
+    # 获取请求参数
+    addr_id = request.GET.get('addrid', -1)
+    addr_id = int(addr_id)
+    # 删除数据
+    Address.objects.get(id=addr_id).delete()
+    return redirect('/user/address/')
