@@ -192,9 +192,8 @@
 
         //在购物车页面点击登录按钮后回转到购物车页面
         $('.sign > a').click(function (event) {
-
             var link = $(this).attr('href')
-            $(this).attr('href', link + "?redirct=cart")
+            $(this).attr('href', link + "?reflag=cart")
         })
 
         //单击结算按钮

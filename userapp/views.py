@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.views import View
 
+from cartapp.cartmanager import SessionCartManager
 from userapp.models import UserInfo, Area, Address
 from utils.code import gene_code
 
@@ -35,17 +36,29 @@ def center_view(request):
 
 class LoginView(View):
     def get(self, request):
-        return render(request, 'login.html')
+        # 标识登录的来源页面，方便登录后跳转到购物车页面
+        reflag = request.GET.get('reflag', '')
+        return render(request, 'login.html', {'reflag': reflag})
 
     def post(self, request):
         # 获取请求参数
         uname = request.POST.get('account', '')
         pwd = request.POST.get('password', '')
 
+        # 获取登录后跳转页面标识，是否来自于购物车页面的登录
+        reflag = request.POST.get('reflag', '')
+
         # 判断是否登录成功
         user = UserInfo.objects.filter(uname=uname, pwd=pwd)
         if user:
             request.session['user'] = jsonpickle.dumps(user[0])
+
+            # 将session中的购物项目存放到数据库
+            SessionCartManager(request.session).migrateSession2DB()
+
+            if reflag == 'cart':
+                return redirect('/cart/queryAll/')
+
             return redirect('/user/center/')
 
         return redirect('/user/login/')

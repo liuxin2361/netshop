@@ -80,12 +80,15 @@ class SessionCartManager(CartManager):
 
     def migrateSession2DB(self):
         if 'user' in self.session:
-            user = self.session.get('user')
+            user = jsonpickle.loads(self.session.get('user'))
+            # 此时cartitem为self.add()序列化CartItem后的数据，所以cartitem中为goods_id，color_id，size_id
             for cartitem in self.queryAll():
-                if CartItem.objects.filter(goods_id=cartitem.goodsid, color_id=cartitem.colorid,
-                                           size_id=cartitem.sizeid).count() == 0:
+                # 如果数据库中没有session中的数据
+                if CartItem.objects.filter(goods_id=cartitem.goods_id, color_id=cartitem.color_id,
+                                           size_id=cartitem.size_id).count() == 0:
                     cartitem.user = user
                     cartitem.save()
+                # 数据库中存在session中的商品，则在数据库中商品数量的基础上在加上session中商品的数量
                 else:
                     item = CartItem.objects.get(goods_id=cartitem.goodsid, color_id=cartitem.colorid,
                                                 size_id=cartitem.sizeid)
