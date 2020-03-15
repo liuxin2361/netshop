@@ -10,19 +10,19 @@ from cartapp.models import CartItem
 
 class CartManager(object):
     def add(self, goodsid, colorid, sizeid, count, *args, **kwargs):
-        '''添加商品，如果商品已经存在就更新商品的数量(self.update())，否则直接放到购物车'''
+        """添加商品，如果商品已经存在就更新商品的数量(self.update())，否则直接放到购物车"""
         pass
 
     def delete(self, goodsid, colorid, sizeid, *args, **kwargs):
-        '''删除一个购物项'''
+        """删除一个购物项"""
         pass
 
     def update(self, goodsid, colorid, sizeid, count, step, *args, **kwargs):
-        '''更新购物项的数据,添加减少购物项数据'''
+        """更新购物项的数据,添加减少购物项数据"""
         pass
 
     def queryAll(self, *args, **kwargs):
-        ''':return CartItem  多个购物项'''
+        """:return CartItem  多个购物项"""
         pass
 
 
@@ -33,10 +33,12 @@ class SessionCartManager(CartManager):
     def __init__(self, session):
         self.session = session
         # 创建购物车 #  {cart:{key1:cartitem,key2:cartitem}}
+        # request.session['cart']['key1']
         if self.cart_name not in self.session:
             self.session[self.cart_name] = OrderedDict()
 
     def __get_key(self, goodsid, colorid, sizeid):
+        # 1,1,1
         return goodsid + ',' + colorid + ',' + sizeid
 
     def add(self, goodsid, colorid, sizeid, count, *args, **kwargs):
@@ -45,15 +47,16 @@ class SessionCartManager(CartManager):
         key = self.__get_key(goodsid, colorid, sizeid)
 
         # session   {'cart':{key1:item}}
-
         # session('cart',[{key1:cartitem,key2:cartitem}])
         if key in self.session[self.cart_name]:
             self.update(goodsid, colorid, sizeid, count, *args, **kwargs)
         else:
-
-            self.session[self.cart_name][key] = CartItem(goodsid=goodsid, colorid=colorid, sizeid=sizeid, count=count)
+            self.session[self.cart_name][key] = jsonpickle.dumps(
+                CartItem(goods_id=goodsid, color_id=colorid, size_id=sizeid,
+                         count=count))
 
     def delete(self, goodsid, colorid, sizeid, *args, **kwargs):
+
         key = self.__get_key(goodsid, colorid, sizeid)
         if key in self.session[self.cart_name]:
             del self.session[self.cart_name][key]
@@ -62,16 +65,18 @@ class SessionCartManager(CartManager):
 
         key = self.__get_key(goodsid, colorid, sizeid)
         if key in self.session[self.cart_name]:
-            cartitem = self.session[self.cart_name][key]
+            # 反序列化成CartItem对象
+            cartitem = jsonpickle.loads(self.session[self.cart_name][key])
             cartitem.count = int(str(cartitem.count)) + int(step)
-
-
         else:
             raise Exception('SessionManager中的update出错了')
 
     def queryAll(self, *args, **kwargs):
-
-        return self.session[self.cart_name].values()
+        cartitem_list = []
+        # 反序列化
+        for c in self.session[self.cart_name].values():
+            cartitem_list.append(jsonpickle.loads(c))
+        return cartitem_list
 
     def migrateSession2DB(self):
         if 'user' in self.session:
@@ -98,7 +103,6 @@ class DBCartManger(CartManager):
     def add(self, goodsid, colorid, sizeid, count, *args, **kwargs):
 
         if self.user.cartitem_set.filter(goods_id=goodsid, color_id=colorid, size_id=sizeid).count() == 1:
-
             self.update(goodsid, colorid, sizeid, count, *args, **kwargs)
         else:
             CartItem.objects.create(goods_id=goodsid, color_id=colorid, size_id=sizeid, count=count, user=self.user)
@@ -107,16 +111,14 @@ class DBCartManger(CartManager):
         self.user.cartitem_set.filter(goods_id=goodsid, color_id=colorid, size_id=sizeid).update(count=0, isdelete=True)
 
     def update(self, goodsid, colorid, sizeid, step, *args, **kwargs):
-
         self.user.cartitem_set.filter(goods_id=goodsid, color_id=colorid, size_id=sizeid).update(
             count=F('count') + int(step), is_delete=False)
 
     def queryAll(self, *args, **kwargs):
-
         return self.user.cartitem_set.order_by('id').filter(is_delete=False).all()
 
-    # 获取当前用户下的所有购物项
     def get_cartitems(self, goodsid, sizeid, colorid, *args, **kwargs):
+        """获取当前用户下的所有购物项"""
         return self.user.cartitem_set.get(goods_id=goodsid, size_id=sizeid, color_id=colorid)
 
 

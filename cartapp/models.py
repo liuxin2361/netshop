@@ -23,4 +23,5 @@ class CartItem(models.Model):
         return Goods.objects.get(id=self.goods_id)
 
     def get_total_price(self):
-        return self.get_goods().price * self.count
+        # 转成int型，避免未登录情况下由于数据类型不一致导致页面总价显示错误
+        return int(self.get_goods().price) * int(self.count)
