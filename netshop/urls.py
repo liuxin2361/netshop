@@ -23,7 +23,7 @@ urlpatterns = [
     path('', include('goodsapp.urls')),
     path('user/', include('userapp.urls')),
     path('cart/', include('cartapp.urls')),
-
+    path('order/', include('orderapp.urls')),
 ]
 
 if settings.DEBUG:

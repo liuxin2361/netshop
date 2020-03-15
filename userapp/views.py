@@ -48,6 +48,9 @@ class LoginView(View):
         # 获取登录后跳转页面标识，是否来自于购物车页面的登录
         reflag = request.POST.get('reflag', '')
 
+        cartitems = request.POST.get('cartitems', '')
+
+        totalPrice = request.POST.get('totalPrice', '')
         # 判断是否登录成功
         user = UserInfo.objects.filter(uname=uname, pwd=pwd)
         if user:
@@ -58,6 +61,8 @@ class LoginView(View):
 
             if reflag == 'cart':
                 return redirect('/cart/queryAll/')
+            elif reflag == 'order':
+                return redirect('/order/?cartitems=' + cartitems + '&totalPrice=' + totalPrice)
 
             return redirect('/user/center/')
 

@@ -90,8 +90,8 @@ class SessionCartManager(CartManager):
                     cartitem.save()
                 # 数据库中存在session中的商品，则在数据库中商品数量的基础上在加上session中商品的数量
                 else:
-                    item = CartItem.objects.get(goods_id=cartitem.goodsid, color_id=cartitem.colorid,
-                                                size_id=cartitem.sizeid)
+                    item = CartItem.objects.get(goods_id=cartitem.goods_id, color_id=cartitem.color_id,
+                                                size_id=cartitem.size_id)
                     item.count = int(item.count) + int(cartitem.count)
                     item.save()
 

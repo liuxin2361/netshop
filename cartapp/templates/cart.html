@@ -30,7 +30,6 @@
                         <li class="list_chk">
                             <input type="checkbox" id="checkbox_2" class="son_check"
                                    style="display: inline-block;position:absolute;left: 21px;top: 54px">
-
                         </li>
                         <li class="list_con">
                             <div class="list_img"><a href="javascript:;"><img src="{{ cart_item.get_color.colorurl }}"
@@ -112,7 +111,7 @@
                 },
                 error: function () {
                     <!--按钮设置了两个点击事件-->
-                     // 停止事件传播
+                    // 停止事件传播
                     event.stopImmediatePropagation()
                 }
 
@@ -147,7 +146,7 @@
                 },
                 error: function () {
                     <!--按钮设置了两个点击事件-->
-                     // 停止事件传播
+                    // 停止事件传播
                     event.stopImmediatePropagation()
                 }
             })
@@ -184,7 +183,7 @@
                 },
                 error: function (event) {
                     //停止事件传播
-                    event.stopImmediatePropagation()
+                    event.stopImmediatePropagation();
                 }
 
             })
@@ -192,34 +191,34 @@
 
         //在购物车页面点击登录按钮后回转到购物车页面
         $('.sign > a').click(function (event) {
-            var link = $(this).attr('href')
-            $(this).attr('href', link + "?reflag=cart")
+            var link = $(this).attr('href');
+            $(this).attr('href', link + "?reflag=cart");
         })
 
         //单击结算按钮
         $('#jiesuan').click(function () {
+            //获取所有商品列表的复选框数组
+            var cks = $('.son_check');
+            var cartitem = [];
 
-            cks = $('.son_check')
-            var cartitem = []
             $.each(cks, function (index, ck) {
                 if ($(ck).prop('checked')) {
-                    var goodsid = $(ck).parents('.order_lists').attr('goodsid')
-                    var sizeid = $(ck).parents('.order_lists').attr('sizeid')
-                    var colorid = $(ck).parents('.order_lists').attr('colorid')
-
-                    cartitem.push(JSON.stringify({'goodsid': goodsid, 'sizeid': sizeid, 'colorid': colorid}))
+                    var goodsid = $(ck).parents('.order_lists').attr('goodsid');
+                    var sizeid = $(ck).parents('.order_lists').attr('sizeid');
+                    var colorid = $(ck).parents('.order_lists').attr('colorid');
+                    // js中{}表示定义一个对象，大部分情况下要有成对的属性和值，或是函数体
+                    cartitem.push({'goodsid': goodsid, 'sizeid': sizeid, 'colorid': colorid});
 
                 }
             })
-
+            //未选中任何商品
             if (cartitem.length == 0) {
                 return;
             }
-
-            var url = '/order/?cartitems=' + cartitem;
+            //JSON.stringify()将转化成json字符串 '[{"goodsid":"1”}]'
+            //url只能是字符串，后台反序列化后得到的是列表
+            var url = '/order/?cartitems=' + JSON.stringify(cartitem) + '&totalPrice=' + $('#all_price').text().substr(1);
             $(this).attr('href', url);
-
-
         })
 
     </script>
