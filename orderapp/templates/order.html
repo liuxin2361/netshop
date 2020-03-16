@@ -81,7 +81,7 @@
                     <p><span class="fl">合计：</span><span class="fr">￥{{ total_price }}</span></p>
                 </div>
                 <!--<input type="button" name="" value="去支付"> -->
-                <a href="http://127.0.0.1:8000/order/order.html" id="pay" class="pay"
+                <a href="/order/order.html" id="pay" class="pay"
                    onclick="javascript:void(0);">去支付</a>
             </div>
         </div>
@@ -98,21 +98,21 @@
         $("#pay").click(function () {
             var cartitems = [];
 
+            // 相当于for循环 index遍历的每个元素下标 item遍历的每个元素对象
             $.each($('.msg ul'), function (index, item) {
                 cartitems.push({
                     "goodsid": $(item).attr('goodsid'),
                     "sizeid": $(item).attr('sizeid'),
                     "colorid": $(item).attr('colorid'),
                     "count": $(item).attr('count')
-                })
-
-            })
+                });
+            });
 
             //拼接请求参数
-            var params = 'address=1&payway=' + $('.way .on').attr('name') + '&cartitems=' + JSON.stringify(cartitems);
+            var params = 'address={{ addr.id }}&payway=' + $('.way .on').attr('name') + '&cartitems=' + JSON.stringify(cartitems) + '&totalPrice={{ total_price }}';
 
             //拼接请求地址
-            var url = '/order/toorder/?' + params;
+            var url = '/order/toPay/?' + params;
 
             $(this).attr('href', url);
 
